@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Super Bros World (Collections) — Play Classic Games on Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #07090f;
+  --bg2: #0d1120;
+  --surface: #111827;
+  --surface2: #1a2238;
+  --border: #1f2d45;
+  --gold: #f5a623;
+  --gold-dim: #2a1f08;
+  --teal: #00d4c8;
+  --teal-dim: #021f1e;
+  --text: #eef2ff;
+  --text-muted: #6b7fa3;
+  --text-dim: #3d5070;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  cursor:default;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.4;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:20px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(to bottom,rgba(7,9,15,.95) 0%,transparent 100%);
+  transition:background .3s;
+}
+nav.scrolled{background:rgba(7,9,15,.97);border-bottom:1px solid var(--border);}
+.nav-logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:15px;font-weight:700;
+  letter-spacing:.1em;
+  display:flex;align-items:center;gap:10px;
+}
+.nav-logo-icon{
+  width:32px;height:32px;border-radius:7px;
+  background:linear-gradient(135deg,var(--gold),#e8820c);
+  display:grid;place-items:center;
+  box-shadow:0 0 16px rgba(245,166,35,.4);
+}
+.nav-logo-icon svg{display:block;}
+.nav-logo span{color:var(--gold);}
+.nav-links{display:flex;gap:32px;align-items:center;}
+.nav-links a{
+  font-size:13px;font-weight:500;color:var(--text-muted);
+  text-decoration:none;transition:color .2s;letter-spacing:.02em;
+}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{
+  background:var(--gold);color:#07090f;
+  font-size:13px;font-weight:700;
+  padding:9px 20px;border-radius:7px;
+  text-decoration:none;transition:all .2s;
+}
+.nav-cta:hover{background:#f0b840;transform:translateY(-1px);box-shadow:0 4px 20px rgba(245,166,35,.35);}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  position:relative;overflow:hidden;
+  padding:120px 40px 80px;
+}
+/* animated background grid */
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;
+  opacity:.25;
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 30%,transparent 100%);
+}
+/* radial glows */
+.hero-glow-gold{
+  position:absolute;top:-10%;right:10%;
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,166,35,.12) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero-glow-teal{
+  position:absolute;bottom:0%;left:-5%;
+  width:500px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,200,.08) 0%,transparent 65%);
+  pointer-events:none;
+}
+
+.hero-inner{
+  max-width:1180px;margin:0 auto;width:100%;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;
+  position:relative;z-index:1;
+}
+.hero-left{}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold-dim);border:1px solid rgba(245,166,35,.3);
+  border-radius:20px;padding:5px 14px;
+  font-size:11.5px;font-weight:600;color:var(--gold);
+  letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:24px;
+  animation:fadeUp .6s ease both;
+}
+.hero-badge::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--gold);animation:pulse 2s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+.hero-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(36px,5vw,62px);
+  font-weight:900;line-height:1.05;
+  letter-spacing:-.02em;
+  margin-bottom:12px;
+  animation:fadeUp .6s .1s ease both;
+}
+.hero-title .line2{
+  background:linear-gradient(90deg,var(--gold),#ffd166);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-title .line3{color:var(--teal);}
+.hero-sub{
+  font-size:16px;color:var(--text-muted);line-height:1.75;
+  max-width:460px;margin-bottom:36px;
+  animation:fadeUp .6s .2s ease both;
+}
+.hero-sub strong{color:var(--text);}
+
+.dl-buttons{
+  display:flex;gap:14px;flex-wrap:wrap;
+  animation:fadeUp .6s .3s ease both;
+}
+.dl-btn{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:11px;padding:13px 22px;
+  text-decoration:none;color:var(--text);
+  transition:all .25s;
+}
+.dl-btn:hover{
+  border-color:var(--gold);
+  background:var(--gold-dim);
+  transform:translateY(-2px);
+  box-shadow:0 8px 28px rgba(245,166,35,.15);
+}
+.dl-btn svg{flex-shrink:0;}
+.dl-btn-text small{display:block;font-size:10px;color:var(--text-muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase;}
+.dl-btn-text strong{display:block;font-size:15px;font-weight:700;margin-top:1px;}
+
+.hero-stats{
+  display:flex;gap:28px;margin-top:40px;
+  animation:fadeUp .6s .4s ease both;
+}
+.stat{}
+.stat-num{
+  font-family:'Orbitron',sans-serif;
+  font-size:22px;font-weight:700;color:var(--text);
+}
+.stat-num span{color:var(--gold);}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:2px;font-weight:500;}
+
+/* ── NDS DEVICE (CSS) ── */
+.hero-right{
+  display:flex;justify-content:center;align-items:center;
+  animation:fadeUp .6s .15s ease both;
+}
+.device-wrap{
+  position:relative;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+
+.nds-device{
+  width:320px;
+  filter:drop-shadow(0 40px 80px rgba(0,0,0,.7)) drop-shadow(0 0 60px rgba(245,166,35,.12));
+  position:relative;z-index:2;
+}
+
+/* glow rings behind device */
+.device-ring{
+  position:absolute;
+  border-radius:50%;border:1px solid rgba(245,166,35,.1);
+  animation:ringPulse 3s ease infinite;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:1;
+}
+.device-ring:nth-child(1){width:360px;height:360px;animation-delay:0s;}
+.device-ring:nth-child(2){width:440px;height:440px;animation-delay:.6s;}
+.device-ring:nth-child(3){width:520px;height:520px;animation-delay:1.2s;}
+@keyframes ringPulse{0%,100%{opacity:.6;}50%{opacity:.15;}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+
+/* ── SECTION COMMON ── */
+section{padding:100px 40px;}
+.section-inner{max-width:1180px;margin:0 auto;}
+.section-label{
+  font-family:'Orbitron',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:16px;
+}
+.section-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(26px,3.5vw,40px);
+  font-weight:800;letter-spacing:-.02em;
+  line-height:1.15;margin-bottom:14px;
+}
+.section-sub{
+  font-size:15.5px;color:var(--text-muted);
+  line-height:1.7;max-width:520px;
+}
+
+/* ── FEATURES ── */
+.features-bg{background:var(--bg2);}
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:20px;margin-top:56px;
+}
+.feat-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:28px 26px;
+  position:relative;overflow:hidden;
+  transition:border-color .3s, transform .3s, box-shadow .3s;
+}
+.feat-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(245,166,35,.04) 0%,transparent 50%);
+  opacity:0;transition:opacity .3s;
+}
+.feat-card:hover{
+  border-color:rgba(245,166,35,.3);
+  transform:translateY(-4px);
+  box-shadow:0 16px 40px rgba(0,0,0,.4);
+}
+.feat-card:hover::before{opacity:1;}
+.feat-icon{
+  width:48px;height:48px;border-radius:12px;
+  background:var(--gold-dim);border:1px solid rgba(245,166,35,.2);
+  display:grid;place-items:center;margin-bottom:20px;
+  font-size:22px;
+}
+.feat-card h3{
+  font-size:16px;font-weight:700;margin-bottom:8px;
+  letter-spacing:-.01em;
+}
+.feat-card p{font-size:13.5px;color:var(--text-muted);line-height:1.7;}
+.feat-badge{
+  position:absolute;top:16px;right:16px;
+  font-size:10px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;
+  background:var(--teal-dim);color:var(--teal);
+  border:1px solid rgba(0,212,200,.2);
+  border-radius:20px;padding:3px 10px;
+}
+
+/* ── GAMES SHOWCASE ── */
+.games-section{position:relative;overflow:hidden;}
+.games-section::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(0,212,200,.04) 0%,transparent 70%);
+}
+.games-scroller-wrap{
+  margin-top:56px;overflow:hidden;
+  -webkit-mask:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);
+  mask:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);
+}
+.games-track{
+  display:flex;gap:18px;
+  animation:scroll 30s linear infinite;
+  width:max-content;
+}
+.games-track:hover{animation-play-state:paused;}
+@keyframes scroll{to{transform:translateX(-50%);}}
+.game-card{
+  width:150px;flex-shrink:0;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+  transition:border-color .3s, transform .3s;
+  cursor:default;
+}
+.game-card:hover{border-color:rgba(245,166,35,.4);transform:scale(1.04);}
+.game-thumb{
+  width:100%;height:150px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:48px;
+  position:relative;overflow:hidden;
+}
+.game-info{padding:12px 14px 14px;}
+.game-title{font-size:12.5px;font-weight:700;line-height:1.3;margin-bottom:3px;}
+.game-genre{font-size:11px;color:var(--text-muted);}
+
+/* ── HOW IT WORKS ── */
+.how-bg{background:var(--bg2);}
+.steps-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:0;margin-top:56px;position:relative;
+}
+.steps-grid::before{
+  content:'';position:absolute;
+  top:32px;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border),var(--border),var(--border),transparent);
+}
+.step-item{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:0 16px;
+  position:relative;z-index:1;
+}
+.step-num{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--surface);
+  border:2px solid var(--border);
+  display:grid;place-items:center;margin-bottom:20px;
+  font-family:'Orbitron',sans-serif;
+  font-size:20px;font-weight:700;color:var(--gold);
+  transition:border-color .3s,box-shadow .3s;
+}
+.step-item:hover .step-num{
+  border-color:var(--gold);
+  box-shadow:0 0 24px rgba(245,166,35,.25);
+}
+.step-icon{font-size:26px;}
+.step-item h3{font-size:15px;font-weight:700;margin-bottom:8px;}
+.step-item p{font-size:13px;color:var(--text-muted);line-height:1.65;}
+
+/* ── ACHIEVEMENT ── */
+.ach-section{position:relative;overflow:hidden;}
+.ach-inner{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:80px;align-items:center;
+}
+.ach-visual{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:28px;
+  position:relative;overflow:hidden;
+}
+.ach-visual::before{
+  content:'';position:absolute;
+  top:-60px;right:-60px;width:200px;height:200px;
+  background:radial-gradient(circle,rgba(245,166,35,.12),transparent 65%);
+}
+.ach-header{
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+}
+.ach-header-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,#f5a623,#e8820c);
+  display:grid;place-items:center;font-size:20px;
+}
+.ach-header h3{font-size:16px;font-weight:700;}
+.ach-header p{font-size:12px;color:var(--text-muted);}
+.ach-list{display:grid;gap:12px;}
+.ach-item{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;
+  display:flex;align-items:center;gap:14px;
+  transition:border-color .3s;
+}
+.ach-item:hover{border-color:rgba(245,166,35,.3);}
+.ach-item-icon{font-size:24px;flex-shrink:0;}
+.ach-item-info{flex:1;}
+.ach-item-name{font-size:13.5px;font-weight:600;margin-bottom:4px;}
+.ach-progress{
+  height:4px;background:var(--border);border-radius:2px;overflow:hidden;
+}
+.ach-progress-fill{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--gold),#ffd166);
+  transition:width .8s ease;
+}
+.ach-item-pts{
+  font-family:'Orbitron',sans-serif;
+  font-size:12px;font-weight:600;color:var(--gold);flex-shrink:0;
+}
+.ach-text h2{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(24px,3vw,36px);font-weight:800;
+  letter-spacing:-.02em;line-height:1.15;margin-bottom:16px;
+}
+.ach-text p{font-size:15px;color:var(--text-muted);line-height:1.75;margin-bottom:24px;}
+.tag-row{display:flex;flex-wrap:wrap;gap:10px;}
+.tag{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;padding:6px 14px;
+  font-size:13px;color:var(--text-muted);font-weight:500;
+}
+.tag.hl{
+  background:var(--gold-dim);color:var(--gold);
+  border-color:rgba(245,166,35,.25);
+}
+
+/* ── CTA SECTION ── */
+.cta-section{
+  background:var(--bg2);
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 80% at 50% 50%,rgba(245,166,35,.07) 0%,transparent 70%);
+}
+.cta-section h2{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(28px,4vw,48px);font-weight:900;
+  letter-spacing:-.02em;line-height:1.1;
+  margin-bottom:16px;
+  position:relative;z-index:1;
+}
+.cta-section h2 span{
+  background:linear-gradient(90deg,var(--gold),#ffd166);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.cta-section p{
+  font-size:16px;color:var(--text-muted);
+  margin-bottom:40px;position:relative;z-index:1;
+}
+.cta-buttons{
+  display:flex;justify-content:center;gap:16px;flex-wrap:wrap;
+  position:relative;z-index:1;
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:40px 40px;
+}
+.footer-inner{
+  max-width:1180px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:20px;
+}
+.footer-logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:13px;font-weight:700;letter-spacing:.08em;
+  color:var(--text-muted);
+}
+.footer-logo span{color:var(--gold);}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{
+  font-size:12.5px;color:var(--text-dim);
+  text-decoration:none;transition:color .2s;
+}
+.footer-links a:hover{color:var(--text-muted);}
+.footer-copy{font-size:12px;color:var(--text-dim);}
+
+/* ── SCROLL REVEAL ── */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.reveal-delay-1{transition-delay:.1s;}
+.reveal-delay-2{transition-delay:.2s;}
+.reveal-delay-3{transition-delay:.3s;}
+.reveal-delay-4{transition-delay:.4s;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;text-align:center;}
+  .hero-right{display:none;}
+  .hero-sub{max-width:100%;}
+  .hero-stats{justify-content:center;}
+  .dl-buttons{justify-content:center;}
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .steps-grid{grid-template-columns:1fr 1fr;gap:32px;}
+  .steps-grid::before{display:none;}
+  .ach-inner{grid-template-columns:1fr;}
+  nav{padding:16px 20px;}
+  section{padding:72px 20px;}
+  .hero{padding:100px 20px 60px;}
+}
+@media(max-width:600px){
+  .features-grid{grid-template-columns:1fr;}
+  .nav-links{display:none;}
+  .footer-inner{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="2" y="4" width="3" height="3" fill="#07090f"/>
+        <rect x="7" y="2" width="4" height="4" fill="#07090f"/>
+        <rect x="13" y="4" width="3" height="3" fill="#07090f"/>
+        <rect x="7" y="8" width="4" height="4" fill="#07090f" opacity=".7"/>
+        <rect x="2" y="11" width="3" height="3" fill="#07090f" opacity=".5"/>
+        <rect x="13" y="11" width="3" height="3" fill="#07090f" opacity=".5"/>
+      </svg>
+    </div>
+    <span>SUPER BROS WORLD <span>COLLECTIONS</span></span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#games">Games</a>
+    <a href="#achievements">Achievements</a>
+    <a href="#how">How It Works</a>
+  </div>
+  <a href="#download" class="nav-cta">Download Free</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="hero-glow-gold"></div>
+  <div class="hero-glow-teal"></div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge">📡 Now on Android &amp; iOS</div>
+      <h1 class="hero-title">
+        <span class="line1">PLAY YOUR</span><br/>
+        <span class="line2">CHILDHOOD</span><br/>
+        <span class="line3">CLASSICS.</span>
+      </h1>
+      <p class="hero-sub">
+        The most complete <strong>Nintendo DS emulator</strong> for mobile.
+        Full library support, achievements, save states, and multiplayer — all in your pocket.
+      </p>
+      <div class="dl-buttons" id="download">
+        <a href="#" class="dl-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.28.07 2.16.73 2.91.77 1.11-.25 2.17-.98 3.36-.86 1.43.17 2.51.78 3.21 1.98-2.94 1.77-2.47 5.84.49 7.09-.6 1.45-1.33 2.85-1.97 3.9M12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25"/></svg>
+          <div class="dl-btn-text"><small>Download on</small><strong>App Store</strong></div>
+        </a>
+        <a href="#" class="dl-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.2.96.1L13.86 12 3.14.14c-.32-.1-.66-.07-.96.1C1.5.6 1 1.37 1 2.25v19.5c0 .88.5 1.65 2.18 2.01zM16.54 8.88L5.8.14l10.74 5.86 2.18-2.18a1.5 1.5 0 0 1 0-2.12L14.36 12l4.56 5.44a1.5 1.5 0 0 1 0-2.12l-2.38-2.38 10.46 5.7-10.46-5.76z"/><path d="M14.14 12L5.8 23.86l10.74-5.74-2.4-6.12z"/></svg>
+          <div class="dl-btn-text"><small>Get it on</small><strong>Google Play</strong></div>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">500<span>K+</span></div>
+          <div class="stat-label">Downloads</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">4.8<span>★</span></div>
+          <div class="stat-label">App Rating</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">1<span>K+</span></div>
+          <div class="stat-label">DS Titles</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="device-wrap">
+        <div class="device-ring"></div>
+        <div class="device-ring"></div>
+        <div class="device-ring"></div>
+        <!-- NDS Device SVG -->
+        <svg class="nds-device" viewBox="0 0 320 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2a2f3e"/>
+              <stop offset="100%" stop-color="#1a1e2a"/>
+            </linearGradient>
+            <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0ff0fc" stop-opacity=".15"/>
+              <stop offset="100%" stop-color="#0a8a96" stop-opacity=".05"/>
+            </linearGradient>
+            <linearGradient id="gameGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1a4a7a"/>
+              <stop offset="50%" stop-color="#0d2a4a"/>
+              <stop offset="100%" stop-color="#071520"/>
+            </linearGradient>
+            <linearGradient id="screenActive" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#001428"/>
+              <stop offset="100%" stop-color="#000c1a"/>
+            </linearGradient>
+            <filter id="screenGlow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+            <filter id="softGlow">
+              <feGaussianBlur stdDeviation="6"/>
+            </filter>
+            <clipPath id="topScreenClip">
+              <rect x="52" y="30" width="216" height="162" rx="4"/>
+            </clipPath>
+            <clipPath id="botScreenClip">
+              <rect x="64" y="290" width="192" height="140" rx="4"/>
+            </clipPath>
+          </defs>
+
+          <!-- TOP HALF BODY -->
+          <rect x="20" y="10" width="280" height="210" rx="18" fill="url(#bodyGrad)"/>
+          <rect x="20" y="10" width="280" height="210" rx="18" fill="none" stroke="#3a4155" stroke-width="1.5"/>
+          <!-- top screen bezel -->
+          <rect x="44" y="22" width="232" height="178" rx="8" fill="#0f1218"/>
+          <rect x="44" y="22" width="232" height="178" rx="8" fill="none" stroke="#252d3d" stroke-width="1"/>
+          <!-- top screen -->
+          <rect x="52" y="30" width="216" height="162" rx="4" fill="url(#screenActive)"/>
+          <!-- screen content: pixel game scene -->
+          <g clip-path="url(#topScreenClip)">
+            <rect x="52" y="30" width="216" height="162" fill="#000d1a"/>
+            <!-- sky gradient -->
+            <rect x="52" y="30" width="216" height="80" fill="#0a1a35"/>
+            <!-- stars -->
+            <circle cx="80" cy="45" r="1" fill="white" opacity=".7"/>
+            <circle cx="120" cy="38" r="1.2" fill="white" opacity=".9"/>
+            <circle cx="165" cy="50" r="1" fill="white" opacity=".6"/>
+            <circle cx="210" cy="42" r="1.5" fill="white" opacity=".8"/>
+            <circle cx="240" cy="55" r="1" fill="white" opacity=".7"/>
+            <circle cx="95" cy="62" r="1" fill="white" opacity=".5"/>
+            <circle cx="195" cy="35" r="1" fill="white" opacity=".6"/>
+            <!-- moon -->
+            <circle cx="235" cy="48" r="12" fill="#f5e56b" opacity=".9"/>
+            <circle cx="240" cy="44" r="10" fill="#0a1a35"/>
+            <!-- mountains -->
+            <polygon points="52,110 90,65 128,110" fill="#0d2240"/>
+            <polygon points="90,110 128,72 166,110" fill="#102850"/>
+            <polygon points="150,110 188,68 226,110" fill="#0d2240"/>
+            <polygon points="200,110 238,75 268,110" fill="#102850"/>
+            <!-- ground -->
+            <rect x="52" y="108" width="216" height="84" fill="#071530"/>
+            <!-- castle silhouette -->
+            <rect x="130" y="75" width="60" height="40" fill="#0a1e3d"/>
+            <rect x="127" y="68" width="10" height="20" fill="#0a1e3d"/>
+            <rect x="150" y="65" width="10" height="22" fill="#0a1e3d"/>
+            <rect x="173" y="68" width="10" height="20" fill="#0a1e3d"/>
+            <!-- castle windows glow -->
+            <rect x="145" y="80" width="8" height="6" fill="#f5a623" opacity=".7"/>
+            <rect x="163" y="80" width="8" height="6" fill="#f5a623" opacity=".5"/>
+            <!-- ground details -->
+            <rect x="52" y="125" width="216" height="2" fill="#0f2a55" opacity=".5"/>
+            <!-- character -->
+            <rect x="148" y="118" width="8" height="10" fill="#4ade80"/>
+            <rect x="150" y="114" width="4" height="5" fill="#ffd166"/>
+            <!-- HUD -->
+            <rect x="56" y="34" width="40" height="6" rx="2" fill="#f5a623" opacity=".9"/>
+            <rect x="56" y="34" width="28" height="6" rx="2" fill="#4ade80"/>
+            <text x="176" y="40" fill="#f5a623" font-size="8" font-family="monospace" opacity=".9">LV.23</text>
+            <text x="56" y="54" fill="#7dd3fc" font-size="7" font-family="monospace" opacity=".8">HP ██████░░</text>
+            <!-- scanlines -->
+            <rect x="52" y="30" width="216" height="162" fill="url(#screenGrad)" opacity=".3"/>
+          </g>
+          <!-- screen glow -->
+          <rect x="52" y="30" width="216" height="162" rx="4" fill="none" stroke="#00d4c8" stroke-width=".5" opacity=".4"/>
+
+          <!-- HINGE -->
+          <rect x="20" y="215" width="280" height="12" rx="0" fill="#151922"/>
+          <rect x="20" y="215" width="280" height="12" fill="none" stroke="#2a3040" stroke-width="1"/>
+          <!-- hinge screws -->
+          <circle cx="60" cy="221" r="5" fill="#1e2535" stroke="#2a3040" stroke-width="1"/>
+          <circle cx="260" cy="221" r="5" fill="#1e2535" stroke="#2a3040" stroke-width="1"/>
+
+          <!-- BOTTOM HALF BODY -->
+          <rect x="20" y="224" width="280" height="286" rx="18" fill="url(#bodyGrad)"/>
+          <rect x="20" y="224" width="280" height="286" rx="18" fill="none" stroke="#3a4155" stroke-width="1.5"/>
+
+          <!-- bottom screen bezel -->
+          <rect x="56" y="282" width="208" height="156" rx="8" fill="#0f1218"/>
+          <rect x="56" y="282" width="208" height="156" rx="8" fill="none" stroke="#252d3d" stroke-width="1"/>
+          <!-- bottom screen -->
+          <rect x="64" y="290" width="192" height="140" rx="4" fill="#000a16"/>
+          <g clip-path="url(#botScreenClip)">
+            <rect x="64" y="290" width="192" height="140" fill="#000a16"/>
+            <!-- touch ui -->
+            <rect x="72" y="298" width="176" height="124" rx="3" fill="#020e1f"/>
+            <!-- map grid -->
+            <rect x="72" y="298" width="88" height="62" fill="#031526"/>
+            <rect x="160" y="298" width="88" height="62" fill="#021020"/>
+            <rect x="72" y="360" width="88" height="62" fill="#021020"/>
+            <rect x="160" y="360" width="88" height="62" fill="#031526"/>
+            <!-- grid lines -->
+            <line x1="72" y1="329" x2="248" y2="329" stroke="#0a2040" stroke-width="1"/>
+            <line x1="72" y1="360" x2="248" y2="360" stroke="#0a2040" stroke-width="1"/>
+            <line x1="72" y1="391" x2="248" y2="391" stroke="#0a2040" stroke-width="1"/>
+            <line x1="160" y1="298" x2="160" y2="422" stroke="#0a2040" stroke-width="1"/>
+            <!-- map items -->
+            <circle cx="110" cy="315" r="6" fill="#4ade80" opacity=".8"/>
+            <circle cx="108" cy="313" r="2" fill="white" opacity=".5"/>
+            <rect x="175" y="305" width="14" height="14" rx="2" fill="#f5a623" opacity=".7"/>
+            <circle cx="105" cy="375" r="8" fill="#00d4c8" opacity=".5"/>
+            <circle cx="200" cy="380" r="5" fill="#f87171" opacity=".6"/>
+            <rect x="170" y="365" width="10" height="10" rx="1" fill="#7c3aed" opacity=".5"/>
+            <!-- scanlines -->
+            <rect x="64" y="290" width="192" height="140" fill="url(#screenGrad)" opacity=".2"/>
+          </g>
+          <rect x="64" y="290" width="192" height="140" rx="4" fill="none" stroke="#00d4c8" stroke-width=".5" opacity=".3"/>
+
+          <!-- D-PAD -->
+          <rect x="50" y="380" width="15" height="48" rx="3" fill="#0f1520" stroke="#252d3d" stroke-width="1"/>
+          <rect x="40" y="390" width="36" height="16" rx="3" fill="#0f1520" stroke="#252d3d" stroke-width="1"/>
+          <circle cx="58" cy="404" r="8" fill="#1a2030" stroke="#2a3545" stroke-width="1"/>
+
+          <!-- ABXY BUTTONS -->
+          <circle cx="252" cy="396" r="9" fill="#1a1030" stroke="#252035" stroke-width="1"/>
+          <circle cx="268" cy="382" r="9" fill="#1a2020" stroke="#253025" stroke-width="1"/>
+          <circle cx="252" cy="368" r="9" fill="#1a1020" stroke="#252030" stroke-width="1"/>
+          <circle cx="236" cy="382" r="9" fill="#1a2025" stroke="#25303a" stroke-width="1"/>
+          <!-- labels -->
+          <text x="249" y="400" fill="#f87171" font-size="9" font-family="monospace" font-weight="bold">B</text>
+          <text x="265" y="386" fill="#4ade80" font-size="9" font-family="monospace" font-weight="bold">A</text>
+          <text x="249" y="372" fill="#fbbf24" font-size="9" font-family="monospace" font-weight="bold">X</text>
+          <text x="233" y="386" fill="#60a5fa" font-size="9" font-family="monospace" font-weight="bold">Y</text>
+
+          <!-- START SELECT -->
+          <rect x="130" y="445" width="24" height="8" rx="4" fill="#1a2030" stroke="#252d3d" stroke-width="1"/>
+          <rect x="166" y="445" width="24" height="8" rx="4" fill="#1a2030" stroke="#252d3d" stroke-width="1"/>
+          <text x="131" y="451" fill="#3d5070" font-size="6" font-family="monospace">SELECT</text>
+          <text x="169" y="451" fill="#3d5070" font-size="6" font-family="monospace">START</text>
+
+          <!-- L R BUMPERS -->
+          <rect x="20" y="224" width="60" height="12" rx="4" fill="#202535" stroke="#2a3040" stroke-width="1"/>
+          <rect x="240" y="224" width="60" height="12" rx="4" fill="#202535" stroke="#2a3040" stroke-width="1"/>
+          <text x="42" y="232" fill="#3d5070" font-size="7" font-family="monospace" font-weight="bold">L</text>
+          <text x="262" y="232" fill="#3d5070" font-size="7" font-family="monospace" font-weight="bold">R</text>
+
+          <!-- SPEAKER GRILLES -->
+          <g opacity=".4">
+            <circle cx="37" cy="470" r="1.5" fill="#3d5070"/>
+            <circle cx="44" cy="470" r="1.5" fill="#3d5070"/>
+            <circle cx="37" cy="478" r="1.5" fill="#3d5070"/>
+            <circle cx="44" cy="478" r="1.5" fill="#3d5070"/>
+            <circle cx="37" cy="486" r="1.5" fill="#3d5070"/>
+            <circle cx="44" cy="486" r="1.5" fill="#3d5070"/>
+          </g>
+          <g opacity=".4">
+            <circle cx="276" cy="470" r="1.5" fill="#3d5070"/>
+            <circle cx="283" cy="470" r="1.5" fill="#3d5070"/>
+            <circle cx="276" cy="478" r="1.5" fill="#3d5070"/>
+            <circle cx="283" cy="478" r="1.5" fill="#3d5070"/>
+            <circle cx="276" cy="486" r="1.5" fill="#3d5070"/>
+            <circle cx="283" cy="486" r="1.5" fill="#3d5070"/>
+          </g>
+
+          <!-- POWER LED -->
+          <circle cx="290" cy="460" r="4" fill="#4ade80">
+            <animate attributeName="opacity" values="1;0.4;1" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="290" cy="460" r="8" fill="#4ade80" opacity=".1">
+            <animate attributeName="opacity" values="0.15;0;0.15" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+
+          <!-- cartridge slot -->
+          <rect x="110" y="500" width="100" height="8" rx="2" fill="#0a0e16" stroke="#1a2030" stroke-width="1"/>
+          <rect x="125" y="503" width="70" height="3" rx="1" fill="#141a28"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-bg" id="features">
+  <div class="section-inner">
+    <p class="section-label reveal">Core Features</p>
+    <h2 class="section-title reveal reveal-delay-1">Everything You Need<br/>For the <span style="color:var(--gold)">Ultimate DS Experience</span></h2>
+    <p class="section-sub reveal reveal-delay-2">Built from the ground up for mobile. Precision emulation, zero compromise.</p>
+    <div class="features-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon">⚡</div>
+        <h3>High-Performance Engine</h3>
+        <p>Full-speed emulation on most modern Android & iOS devices. Hardware-accelerated rendering keeps every game buttery smooth.</p>
+        <span class="feat-badge">60 FPS</span>
+      </div>
+      <div class="feat-card reveal reveal-delay-1">
+        <div class="feat-icon">💾</div>
+        <h3>Save States & Cloud Sync</h3>
+        <p>Save anywhere, resume anywhere. Cloud sync across devices means your progress is always with you — even when you switch phones.</p>
+      </div>
+      <div class="feat-card reveal reveal-delay-2">
+        <div class="feat-icon">🏆</div>
+        <h3>RetroAchievements</h3>
+        <p>Earn thousands of achievements integrated with RetroAchievements.org. Track your progress, compare with friends, and unlock badges.</p>
+        <span class="feat-badge">NEW</span>
+      </div>
+      <div class="feat-card reveal reveal-delay-1">
+        <div class="feat-icon">🎮</div>
+        <h3>Controller Support</h3>
+        <p>Play with any Bluetooth gamepad. Full button mapping, vibration feedback, and optimized touch controls when gaming on the go.</p>
+      </div>
+      <div class="feat-card reveal reveal-delay-2">
+        <div class="feat-icon">🌐</div>
+        <h3>Wi-Fi Multiplayer</h3>
+        <p>Simulate local wireless play over Wi-Fi with friends. Trade Pokémon, battle head-to-head, and relive the DS multiplayer magic.</p>
+      </div>
+      <div class="feat-card reveal reveal-delay-3">
+        <div class="feat-icon">🖼️</div>
+        <h3>Enhanced Visuals</h3>
+        <p>Upscaling filters, widescreen hacks, and texture smoothing breathe new life into classics. Or keep it pixel-perfect — your choice.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GAMES SHOWCASE -->
+<section class="games-section" id="games">
+  <div class="section-inner">
+    <p class="section-label reveal">Game Library</p>
+    <h2 class="section-title reveal reveal-delay-1">Thousands of <span style="color:var(--teal)">Classic Titles</span></h2>
+    <p class="section-sub reveal reveal-delay-2">From Pokémon to Zelda, Castlevania to Mario Kart — your entire DS library in one place.</p>
+  </div>
+  <div class="games-scroller-wrap" style="margin-top:48px;">
+    <div class="games-track" id="gtrack">
+      <!-- cards duplicated in JS -->
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#1a3a1a,#0d1f0d)">🎮</div><div class="game-info"><div class="game-title">Pokémon HeartGold</div><div class="game-genre">RPG · Adventure</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#1a1a3a,#0d0d1f)">⚔️</div><div class="game-info"><div class="game-title">The Legend of Zelda: PH</div><div class="game-genre">Action · Adventure</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#3a1a1a,#1f0d0d)">🏎️</div><div class="game-info"><div class="game-title">Mario Kart DS</div><div class="game-genre">Racing · Party</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#1a2a3a,#0d1520)">🌙</div><div class="game-info"><div class="game-title">Castlevania: DoS</div><div class="game-genre">Action · RPG</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#2a1a3a,#150d1f)">🧩</div><div class="game-info"><div class="game-title">Professor Layton</div><div class="game-genre">Puzzle · Mystery</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#1a3a2a,#0d1f15)">🌿</div><div class="game-info"><div class="game-title">Animal Crossing: WW</div><div class="game-genre">Simulation · Life</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#3a2a1a,#1f150d)">🔥</div><div class="game-info"><div class="game-title">Fire Emblem: Shadow</div><div class="game-genre">Strategy · JRPG</div></div></div>
+      <div class="game-card"><div class="game-thumb" style="background:linear-gradient(135deg,#1a1a1a,#111)">⭐</div><div class="game-info"><div class="game-title">New Super Mario Bros</div><div class="game-genre">Platformer · Classic</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-bg" id="how">
+  <div class="section-inner">
+    <p class="section-label reveal" style="text-align:center">Getting Started</p>
+    <h2 class="section-title reveal reveal-delay-1" style="text-align:center">Up and Running<br/><span style="color:var(--gold)">in Minutes</span></h2>
+    <div class="steps-grid">
+      <div class="step-item reveal">
+        <div class="step-num"><span class="step-icon">📲</span></div>
+        <h3>Download the App</h3>
+        <p>Free on Google Play and the App Store. No account required to get started.</p>
+      </div>
+      <div class="step-item reveal reveal-delay-1">
+        <div class="step-num"><span class="step-icon">📂</span></div>
+        <h3>Add Your ROMs</h3>
+        <p>Load ROM files you legally own. Supports .nds, .zip, and all common formats.</p>
+      </div>
+      <div class="step-item reveal reveal-delay-2">
+        <div class="step-num"><span class="step-icon">⚙️</span></div>
+        <h3>Configure Controls</h3>
+        <p>Set up your touch layout or pair a Bluetooth controller. Auto-detect handles the rest.</p>
+      </div>
+      <div class="step-item reveal reveal-delay-3">
+        <div class="step-num"><span class="step-icon">🎮</span></div>
+        <h3>Play & Earn</h3>
+        <p>Jump in and start earning achievements, climbing leaderboards, and reliving nostalgia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section class="ach-section" id="achievements">
+  <div class="section-inner">
+    <div class="ach-inner">
+      <div class="ach-visual reveal">
+        <div class="ach-header">
+          <div class="ach-header-icon">🏆</div>
+          <div>
+            <h3>Achievement Progress</h3>
+            <p style="color:var(--text-muted);font-size:12.5px;">Pokémon HeartGold · 47 / 124</p>
+          </div>
+        </div>
+        <div class="ach-list">
+          <div class="ach-item">
+            <span class="ach-item-icon">🥇</span>
+            <div class="ach-item-info">
+              <div class="ach-item-name">Champion of Johto</div>
+              <div class="ach-progress"><div class="ach-progress-fill" style="width:100%"></div></div>
+            </div>
+            <span class="ach-item-pts">50 pts</span>
+          </div>
+          <div class="ach-item">
+            <span class="ach-item-icon">🦋</span>
+            <div class="ach-item-info">
+              <div class="ach-item-name">Pokédex Completionist</div>
+              <div class="ach-progress"><div class="ach-progress-fill" style="width:68%"></div></div>
+            </div>
+            <span class="ach-item-pts">25 pts</span>
+          </div>
+          <div class="ach-item">
+            <span class="ach-item-icon">⚡</span>
+            <div class="ach-item-info">
+              <div class="ach-item-name">Shiny Hunter</div>
+              <div class="ach-progress"><div class="ach-progress-fill" style="width:32%"></div></div>
+            </div>
+            <span class="ach-item-pts">30 pts</span>
+          </div>
+          <div class="ach-item">
+            <span class="ach-item-icon">🌟</span>
+            <div class="ach-item-info">
+              <div class="ach-item-name">Red Defeated</div>
+              <div class="ach-progress"><div class="ach-progress-fill" style="width:0%"></div></div>
+            </div>
+            <span class="ach-item-pts">100 pts</span>
+          </div>
+        </div>
+      </div>
+      <div class="ach-text reveal reveal-delay-1">
+        <p class="section-label">RetroAchievements</p>
+        <h2>Unlock Your<br/><span style="color:var(--gold)">Legacy.</span></h2>
+        <p>Connect your RetroAchievements account and earn recognition for every milestone. Thousands of achievements across the entire DS library — every game becomes a new challenge.</p>
+        <div class="tag-row">
+          <span class="tag hl">🏆 124 Achievements</span>
+          <span class="tag hl">📊 Leaderboards</span>
+          <span class="tag">🎯 Daily Challenges</span>
+          <span class="tag">👥 Friends &amp; Rivals</span>
+          <span class="tag">🔔 Push Notifications</span>
+          <span class="tag">📱 Live Tracking</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="reveal">Start Playing <span>Today.</span><br/>It's Free.</h2>
+    <p class="reveal reveal-delay-1">No subscription. No paywalls on core features. Just your games, in your hands.</p>
+    <div class="cta-buttons reveal reveal-delay-2">
+      <a href="#" class="dl-btn" style="background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.3);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.28.07 2.16.73 2.91.77 1.11-.25 2.17-.98 3.36-.86 1.43.17 2.51.78 3.21 1.98-2.94 1.77-2.47 5.84.49 7.09-.6 1.45-1.33 2.85-1.97 3.9M12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25"/></svg>
+        <div class="dl-btn-text"><small>Download on</small><strong>App Store</strong></div>
+      </a>
+      <a href="#" class="dl-btn" style="background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.3);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.2.96.1L13.86 12 3.14.14c-.32-.1-.66-.07-.96.1C1.5.6 1 1.37 1 2.25v19.5c0 .88.5 1.65 2.18 2.01zM14.14 12L5.8 23.86l10.74-5.74-2.4-6.12z"/></svg>
+        <div class="dl-btn-text"><small>Get it on</small><strong>Google Play</strong></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">RETRO <span>NDS</span> GAMES</div>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="account-deletion-request.html">Delete Account</a>
+      <a href="#">Terms of Service</a>
+      <a href="mailto:support@arcadex.io">Contact</a>
+    </div>
+    <p class="footer-copy">© 2025 ArcadeX All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+// Nav scroll effect
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// Duplicate game cards for infinite scroll
+const track = document.getElementById('gtrack');
+track.innerHTML += track.innerHTML;
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

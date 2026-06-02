@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delete My Account – Super Bros World (Collections)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --surface2:  #1e2530;
+      --border:    #2a3140;
+      --accent:    #4ade80;
+      --accent-dim:#1f4332;
+      --text:      #e6edf3;
+      --text-muted:#7d8fa3;
+      --red:       #f87171;
+      --red-dim:   #3b1c1c;
+      --red-border:rgba(248,113,113,.3);
+      --yellow:    #fbbf24;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, #2a3140 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: .3;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      top: -160px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(248,113,113,.09) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* HEADER */
+    header {
+      position: relative; z-index: 1;
+      border-bottom: 1px solid var(--border);
+      padding: 18px 0;
+    }
+    .header-inner {
+      max-width: 600px; margin: 0 auto;
+      padding: 0 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: var(--accent-dim);
+      border: 1.5px solid var(--accent);
+      border-radius: 8px;
+      display: grid; place-items: center;
+    }
+    .logo-mark svg { display: block; }
+    .logo-text { font-size: 14px; font-weight: 600; }
+    .logo-text span { color: var(--accent); }
+
+    /* PAGE */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 600px; margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* STEP VIEWS */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* HERO */
+    .page-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--red);
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .page-eyebrow::before {
+      content: ''; display: inline-block;
+      width: 20px; height: 1.5px; background: var(--red);
+    }
+    h1 {
+      font-size: clamp(24px, 4vw, 32px);
+      font-weight: 700; letter-spacing: -.02em;
+      margin-bottom: 10px;
+    }
+    .page-sub {
+      color: var(--text-muted);
+      font-size: 14.5px; line-height: 1.65;
+      margin-bottom: 32px;
+    }
+
+    /* WARNING CARD */
+    .warn-card {
+      background: var(--red-dim);
+      border: 1px solid var(--red-border);
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 32px;
+    }
+    .warn-card-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13.5px; font-weight: 600; color: var(--red);
+      margin-bottom: 10px;
+    }
+    .warn-list {
+      list-style: none;
+      display: grid; gap: 7px;
+    }
+    .warn-list li {
+      font-size: 13px; color: #f5c6c6;
+      display: flex; align-items: flex-start; gap: 8px;
+      line-height: 1.55;
+    }
+    .warn-list li::before {
+      content: '×';
+      color: var(--red); font-weight: 700;
+      flex-shrink: 0; margin-top: 1px;
+    }
+
+    /* FORM */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 28px;
+    }
+    .form-group { margin-bottom: 22px; }
+    .form-group:last-of-type { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 13px; font-weight: 600;
+      color: var(--text); margin-bottom: 8px;
+    }
+    label .req { color: var(--red); margin-left: 3px; }
+    label .hint {
+      font-weight: 400; color: var(--text-muted);
+      margin-left: 6px; font-size: 12px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(74,222,128,.5);
+      box-shadow: 0 0 0 3px rgba(74,222,128,.08);
+    }
+    input.error, select.error, textarea.error {
+      border-color: var(--red-border);
+      box-shadow: 0 0 0 3px rgba(248,113,113,.08);
+    }
+    .field-error {
+      font-size: 12px; color: var(--red);
+      margin-top: 5px; display: none;
+    }
+    .field-error.show { display: block; }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d8fa3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    select option { background: #1e2530; }
+
+    textarea { resize: vertical; min-height: 100px; }
+
+    /* CHECKBOX */
+    .checkbox-group {
+      display: flex; gap: 12px; align-items: flex-start;
+      cursor: pointer;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px; height: 18px; min-width: 18px;
+      border-radius: 5px; cursor: pointer;
+      margin-top: 1px; padding: 0;
+      accent-color: var(--accent);
+    }
+    .checkbox-group span {
+      font-size: 13.5px; color: #b6c2cf; line-height: 1.6;
+    }
+    .checkbox-group span strong { color: var(--text); }
+    .checkbox-group.error-check span { color: var(--red); }
+
+    /* DIVIDER */
+    .divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    /* BUTTONS */
+    .btn-danger {
+      width: 100%;
+      padding: 13px 20px;
+      background: var(--red);
+      color: #fff;
+      font-family: 'Sora', sans-serif;
+      font-size: 15px; font-weight: 700;
+      border: none; border-radius: 9px;
+      cursor: pointer;
+      transition: background .2s, transform .15s, opacity .2s;
+      margin-top: 24px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-danger:hover { background: #ef4444; transform: translateY(-1px); }
+    .btn-danger:active { transform: translateY(0); }
+    .btn-danger:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      display: block; text-align: center;
+      margin-top: 14px;
+      font-size: 13.5px; color: var(--text-muted);
+      cursor: pointer; text-decoration: none;
+      transition: color .2s;
+      background: none; border: none;
+      width: 100%; font-family: 'Sora', sans-serif;
+    }
+    .btn-ghost:hover { color: var(--text); }
+
+    /* SPINNER */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SUCCESS VIEW */
+    .success-icon {
+      width: 72px; height: 72px;
+      background: var(--accent-dim);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      margin: 0 auto 28px;
+      font-size: 32px;
+    }
+    .success-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 36px 28px;
+      text-align: center;
+    }
+    .success-card h2 {
+      font-size: 22px; font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .success-card p {
+      color: var(--text-muted);
+      font-size: 14px; line-height: 1.7;
+      margin-bottom: 10px;
+    }
+    .ref-code {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 16px;
+      color: var(--accent);
+      margin: 12px 0 20px;
+    }
+    .timeline-mini {
+      text-align: left;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-top: 20px;
+    }
+    .timeline-mini h4 {
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-muted); margin-bottom: 14px;
+    }
+    .tl-mini-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding-bottom: 12px;
+    }
+    .tl-mini-item:last-child { padding-bottom: 0; }
+    .tl-mini-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0; margin-top: 6px;
+    }
+    .tl-mini-item p { font-size: 13px; color: #b6c2cf; line-height: 1.5; }
+    .tl-mini-item p strong { color: var(--text); }
+
+    /* footer */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 20px; text-align: center;
+    }
+    footer p { font-size: 12px; color: var(--text-muted); line-height: 1.8; }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 480px) {
+      .form-card { padding: 22px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-mark">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="2" y="6" width="3" height="3" fill="#4ade80"/>
+        <rect x="7" y="3" width="3" height="3" fill="#4ade80"/>
+        <rect x="12" y="6" width="3" height="3" fill="#4ade80"/>
+        <rect x="7" y="9" width="3" height="3" fill="#86efac"/>
+        <rect x="2" y="12" width="3" height="3" fill="#86efac" opacity=".5"/>
+        <rect x="12" y="12" width="3" height="3" fill="#86efac" opacity=".5"/>
+      </svg>
+    </div>
+    <span class="logo-text">Super Bros World (Collections)</span>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ── FORM VIEW ─────────────────────────── -->
+  <div class="view active" id="view-form">
+
+    <p class="page-eyebrow">Account Management</p>
+    <h1>Delete My Account</h1>
+    <p class="page-sub">Submit this form to permanently delete your account. Please read the warnings below before proceeding.</p>
+
+    <!-- Warning -->
+    <div class="warn-card">
+      <div class="warn-card-title">⚠️ This action is permanent and cannot be undone</div>
+      <ul class="warn-list">
+        <li>All game saves, achievements, and progress will be permanently deleted</li>
+        <li>In-app purchases and unlocked content will be lost — no refunds</li>
+        <li>Your username will be released and may be claimed by others</li>
+        <li>You will have a 7-day grace period to cancel before deletion completes</li>
+      </ul>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card">
+      <div class="form-group">
+        <label for="email">Registered Email Address <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+        <p class="field-error" id="err-email">Please enter a valid email address.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="username">In-game Username <span class="req">*</span> <span class="hint">Case-sensitive</span></label>
+        <input type="text" id="username" placeholder="e.g. StarPlayer_99" autocomplete="off" />
+        <p class="field-error" id="err-username">Username is required.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="reason">Reason for Deletion <span class="req">*</span></label>
+        <select id="reason">
+          <option value="" disabled selected>Select a reason…</option>
+          <option value="not-using">I no longer use the app</option>
+          <option value="privacy">Privacy concerns</option>
+          <option value="too-many-ads">Too many ads</option>
+          <option value="found-alternative">Found a better alternative</option>
+          <option value="technical">Technical issues / bugs</option>
+          <option value="other">Other</option>
+        </select>
+        <p class="field-error" id="err-reason">Please select a reason.</p>
+      </div>
+
+      <div class="form-group" id="group-notes">
+        <label for="notes">Additional Comments <span class="hint">Optional</span></label>
+        <textarea id="notes" placeholder="Tell us more (optional)…"></textarea>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="form-group">
+        <label class="checkbox-group" id="label-confirm1">
+          <input type="checkbox" id="confirm1" />
+          <span>I understand that <strong>all my data will be permanently deleted</strong> and this action cannot be reversed.</span>
+        </label>
+        <p class="field-error" id="err-confirm1">You must acknowledge this to continue.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-group" id="label-confirm2">
+          <input type="checkbox" id="confirm2" />
+          <span>I confirm that I am the <strong>account owner</strong> and I want to permanently delete my account.</span>
+        </label>
+        <p class="field-error" id="err-confirm2">You must confirm ownership to continue.</p>
+      </div>
+
+      <button class="btn-danger" id="btn-submit" onclick="handleSubmit()">
+        🗑️ Submit Deletion Request
+      </button>
+      <a class="btn-ghost" href="#">Cancel — Keep My Account</a>
+    </div>
+
+    <p style="margin-top:20px; font-size:12.5px; color:var(--text-muted); text-align:center; line-height:1.7;">
+      By submitting, you agree to our <a href="#" style="color:var(--text-muted); text-decoration:underline;">Privacy Policy</a>.<br/>
+      Questions? Email <a href="mailto:voadrew6@gmail.com" style="color:var(--accent);">support@arcadenix.io</a>
+    </p>
+  </div>
+
+  <!-- ── SUCCESS VIEW ───────────────────────── -->
+  <div class="view" id="view-success">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <h2>Request Submitted</h2>
+      <p>Your account deletion request has been received. We've sent a confirmation to:</p>
+      <p><strong id="success-email" style="color:var(--text)"></strong></p>
+      <div class="ref-code" id="ref-code"></div>
+      <p style="font-size:13px;">Please keep this reference code for your records.</p>
+
+      <div class="timeline-mini">
+        <h4>What happens next</h4>
+        <div class="tl-mini-item">
+          <div class="tl-mini-dot"></div>
+          <p><strong>Now – 24 hrs:</strong> Confirmation email sent to your inbox.</p>
+        </div>
+        <div class="tl-mini-item">
+          <div class="tl-mini-dot"></div>
+          <p><strong>7-day grace period:</strong> Your account is deactivated. Log in anytime to cancel.</p>
+        </div>
+        <div class="tl-mini-item">
+          <div class="tl-mini-dot"></div>
+          <p><strong>Day 7–30:</strong> All personal data is permanently deleted from our systems.</p>
+        </div>
+        <div class="tl-mini-item">
+          <div class="tl-mini-dot"></div>
+          <p><strong>Final email:</strong> You'll be notified once deletion is fully complete.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<footer>
+  <p>
+    © 2025 Arcadenix Technologies · <a href="#">Privacy Policy</a> · <a href="#">Terms of Service</a>
+  </p>
+</footer>
+
+<script>
+  function generateRef() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let r = 'DEL-';
+    for (let i = 0; i < 8; i++) r += chars[Math.floor(Math.random() * chars.length)];
+    return r;
+  }
+
+  function validateEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  }
+
+  function setError(inputId, errId, show) {
+    const el = document.getElementById(inputId);
+    const err = document.getElementById(errId);
+    if (show) {
+      el && el.classList.add('error');
+      err && err.classList.add('show');
+    } else {
+      el && el.classList.remove('error');
+      err && err.classList.remove('show');
+    }
+    return show;
+  }
+
+  function setCheckboxError(checkId, labelId, errId, show) {
+    const lbl = document.getElementById(labelId);
+    const err = document.getElementById(errId);
+    if (show) {
+      lbl && lbl.classList.add('error-check');
+      err && err.classList.add('show');
+    } else {
+      lbl && lbl.classList.remove('error-check');
+      err && err.classList.remove('show');
+    }
+    return show;
+  }
+
+  // clear errors on input
+  ['email','username','reason'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => {
+      el.classList.remove('error');
+      const err = document.getElementById('err-' + id);
+      if (err) err.classList.remove('show');
+    });
+  });
+
+  function handleSubmit() {
+    const email    = document.getElementById('email').value;
+    const username = document.getElementById('username').value.trim();
+    const reason   = document.getElementById('reason').value;
+    const c1       = document.getElementById('confirm1').checked;
+    const c2       = document.getElementById('confirm2').checked;
+
+    let hasError = false;
+    if (!validateEmail(email))  hasError = setError('email',    'err-email',    true)  || hasError;
+    else                                   setError('email',    'err-email',    false);
+    if (!username)              hasError = setError('username', 'err-username', true)  || hasError;
+    else                                   setError('username', 'err-username', false);
+    if (!reason)                hasError = setError('reason',   'err-reason',   true)  || hasError;
+    else                                   setError('reason',   'err-reason',   false);
+    if (!c1) hasError = setCheckboxError('confirm1','label-confirm1','err-confirm1', true)  || hasError;
+    else           setCheckboxError('confirm1','label-confirm1','err-confirm1', false);
+    if (!c2) hasError = setCheckboxError('confirm2','label-confirm2','err-confirm2', true)  || hasError;
+    else           setCheckboxError('confirm2','label-confirm2','err-confirm2', false);
+
+    if (hasError) return;
+
+    // Show loading
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Submitting…';
+
+    // Simulate API call
+    setTimeout(() => {
+      document.getElementById('success-email').textContent = email.trim();
+      document.getElementById('ref-code').textContent = generateRef();
+      document.getElementById('view-form').classList.remove('active');
+      document.getElementById('view-success').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 1800);
+  }
+</script>
+</body>
+</html>
